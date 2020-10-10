@@ -1,0 +1,7 @@
+node_modules/
+privatekey.json
+privatekey.json.remi
+src/merchants.js
+mongo-volume/
+.env
+.vscode/
