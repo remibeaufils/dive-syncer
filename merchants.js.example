@@ -1,30 +1,31 @@
 module.exports = [
   {
-    name: 'company1',
-    shopify: {
-      store: 'company1',
-      privateApp: {
-        key: 'aaa',
-        password: 'bbb'
-      }
-    },
-    googleAnalytics: {
-      viewId: 0,
-    },
-    googleAdwords: {},
-    facebook: {},
-    spreadsheet: {
-      url: 'https://docs.google.com/spreadsheets/d/...',
-      id: '...',
-      sheets: {
-        shopify: {
-          name: 'Shopify - DB (extract pure data) - WORLD',
-        },
-        googleAnalytics: {
-          name: 'Google Analytics - DB (extract pure data)',
-          id: 0
+    name: 'company 1',
+    id: 'company-1',
+    database: 'company_1',
+    sources: [
+      {
+        name: 'shopify',
+        database: 'company_1',
+        collection: undefined,
+        store: 'company-1',
+        privateApp: {
+          key: 'aaa',
+          password: 'bbb'
         }
-      }
-    }
+      },
+      {
+        name: 'googleAnalytics',
+        database: 'company_1',
+        collection: undefined,
+        viewId: 123456789,
+      },
+      /* {
+        name: 'googleAdwords'
+      },
+      {
+        name: 'facebook'
+      } */
+    ]
   }
 ];

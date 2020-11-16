@@ -1,5 +1,5 @@
 const {google} = require('googleapis');
-const privatekey = require("../../privatekey.json");
+const privatekey = require("../privatekey.json");
 
 class GoogleAuth {
   constructor() {
@@ -7,7 +7,7 @@ class GoogleAuth {
       privatekey.client_email,
       // null,
       // privatekey.private_key,
-      __dirname + '/../../privatekey.json',
+      __dirname + '/../privatekey.json',
       null,
       [
         'https://www.googleapis.com/auth/spreadsheets',
@@ -22,8 +22,11 @@ class GoogleAuth {
       return await new Promise((resolve, reject) =>
         this.jwtClient.authorize((err, tokens) => {
           if (err) {
-            reject(err);
-            return;
+            return reject(err);
+          }
+
+          if (!this.isAuthorized()) {
+            return reject('Couldn\'t authenticate to Google');
           }
         
           console.log('\x1b[32mGoogle Auth: authorized\x1b[0m');
@@ -38,7 +41,7 @@ class GoogleAuth {
     }
   }
 
-  isConnected() {
+  isAuthorized() {
     return !!this.jwtClient
       && !!this.jwtClient.gtoken
       && !!this.jwtClient.gtoken.token;

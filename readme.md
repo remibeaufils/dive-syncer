@@ -1,29 +1,67 @@
-Start container
+# Configure project
 
-`docker-compose up`
+1. Create .env file
 
-Start container in background
+`cp .env.example .env`
 
-`docker-compose up -d`
+2. Set value in .env file
 
-Stop container
+`...`
+
+3. Create docker-init-mongo.js file
+
+`cp docker-init-mongo.js.example docker-init-mongo.js`
+
+4. Set value in docker-init-mongo.js file
+
+`...`
+
+5. Create merchants.js file
+
+`cp merchants.js.example merchants.js`
+
+6. Set value in merchants.js file
+
+`...`
+
+7. Add Google Cloud service account *privatekey.json* file to the root of the project
+
+`...`
+
+8. Start container [in background]
+
+`docker-compose up [-d]`
+
+# Run Project
+
+`node src/index.js merchant_id [source_name...]`
+
+# Docker commands
+
+Stop all running containers
 
 `docker-compose stop`
 
-Stop only specific service
+Stop only specific service running in container
 
 `docker-compose stop database`
+
+Remove all stopped containers declared in docker-compose file
+
+`docker-compose rm [-f]`
 
 Remove volumes attached to the container
 
 `docker-compose rm -v`
 
-Remove specific container by specifying the container name
+List containers related to images declared in docker-compose file.
 
-`docker-compose rm -f data`
+`docker-compose ps`
 
-----------------------------------------------
+List all running containers in docker engine
 
-Run app
+`docker ps -a`
 
-`node src/index.js`
+Remove specific stopped container
+
+`docker rm container_id`

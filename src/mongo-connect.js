@@ -1,22 +1,30 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
-class MongoBot {
+class MongoConnect {
   constructor() {
     this.client = new MongoClient(
-      `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@127.0.0.1:27017`,
+      `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOSTNAME}:${process.env.MONGO_PORT}`,
       { useNewUrlParser: true, useUnifiedTopology: true }
     );
   }
 
   async connect() {
+    console.log('Connecting to Mongo...'); 
+
     await this.client.connect();
+    
+    if (!this.isConnected()) {
+      throw Error('Couldn\'t connect to Mongo')      
+    }
+
     console.log('\x1b[32mMongo: connection opened\x1b[0m');
+
     return this.client;
   }
 
   isConnected() {
-    return !!this.client && this.client.isConnected();
+    return this.client && this.client.isConnected();
   }
 
   async close() {
@@ -25,4 +33,4 @@ class MongoBot {
   }
 }
 
-module.exports = new MongoBot();
+module.exports = new MongoConnect();

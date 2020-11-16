@@ -1,6 +1,6 @@
 db.createUser({
-	user: 'admin',
-	pwd: '3xp8ej9*&HDE',
+	user: '!! replace by value of .env.MONGO_USERNAME',
+	pwd: '!! replace by value of .env.MONGO_PASSWORD',
 	roles: [
 		// {role: 'readWrite', db: 'joombo'}
 		'userAdminAnyDatabase',

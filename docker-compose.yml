@@ -2,7 +2,7 @@ version: '3'
 services:
   database:
     image: 'mongo'
-    container_name: 'diveanalytics-mongo-container'
+    container_name: 'diveanalytics-syncer-mongo'
     env_file:
         - .env
     environment:
@@ -11,6 +11,9 @@ services:
         MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - ./docker-init-mongo.js:/docker-entrypoint-initdb.d/docker-init-mongo.js:ro
-      - ./mongo-volume:/data/db
+      - mongodata:/data/db
     ports:
-        - '27017-27019:27017-27019'
+        # - '27017-27019:27017-27019'
+        - '27017:27017'
+volumes:
+  mongodata:

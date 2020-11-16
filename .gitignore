@@ -1,7 +1,7 @@
-node_modules/
-privatekey.json
-privatekey.json.remi
-src/merchants.js
-mongo-volume/
-.env
 .vscode/
+mongo-volume*/
+node_modules/
+.env
+privatekey.json*
+merchants.js
+docker-init-mongo.js

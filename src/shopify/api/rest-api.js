@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const getEndpoint = ({key, password}, store) => `https://${key}:${password}@${store}.myshopify.com/admin/api/2020-07`;
+const getEndpoint = ({key, password}, store) => `https://${key}:${password}@${store}.myshopify.com/admin/api/2020-10`;
 
 const getOrders = async ({privateApp, store}, params) => {
   try {
@@ -11,7 +11,7 @@ const getOrders = async ({privateApp, store}, params) => {
 
     return response.data.orders;    
   } catch (error) {
-    console.log('Error: ', error.message);
+    console.log('\x1b[31mError: %s\x1b[0m', error.message);
 
     return [];    
   }

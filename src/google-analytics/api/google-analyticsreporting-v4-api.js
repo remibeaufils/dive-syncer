@@ -22,8 +22,10 @@ const batchGet = async (params) => {
       : report.data.rows.map(
         row => row.dimensions.concat(row.metrics[0].values)
       );
+
+    const nextPageToken = report.nextPageToken;
     
-    results.push({headers, rows});
+    results.push({headers, rows, nextPageToken});
   });
 
   return results;
