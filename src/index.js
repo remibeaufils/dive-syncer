@@ -1,4 +1,4 @@
-const merchants = require('../merchants');
+const stores = require('../stores');
 const mongo = require('./mongo-connect');
 const syncers = {
   shopify: require('./shopify/syncer'),
@@ -14,34 +14,34 @@ axios.interceptors.request.use((request) => {
 }) */
 
 const getSourcesToSync = (args) => {
-  const argMerchant = args[2];
+  const argStore = args[2];
 
-  if (!argMerchant) {
-    throw Error('Could not find mandatory argument merchant id');
+  if (!argStore) {
+    throw Error('Could not find mandatory argument store id');
   }
 
-  const merchant = merchants.find(({id}) => id === argMerchant);
+  const store = stores.find(({id}) => id === argStore);
 
-  if (!merchant) {
-    throw Error(`Could not find merchant with id '${argMerchant}'`);
+  if (!store) {
+    throw Error(`Could not find store with id '${argStore}'`);
   }
 
   const argSources = args.slice(3);
   
   if (!argSources.length) {
-    return merchant.sources;
+    return store.sources.map(source => ({ ...source, database: store.database, storeId: store.id }));
   }
 
   return argSources.reduce((acc, argSource) => {
-    const merchantSource = merchant.sources.find(
+    const storeSource = store.sources.find(
       ({name}) => name === argSource
     );
 
-    if (!merchantSource) {
-      throw Error(`Merchant '${argMerchant}' doesn't have source '${argSource}'`);
+    if (!storeSource) {
+      throw Error(`Store '${argStore}' doesn't have source '${argSource}'`);
     }
 
-    return [...acc, merchantSource];
+    return [...acc, { ...storeSource, database: store.database, storeId: store.id }];
   }, []);
 }
 

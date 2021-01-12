@@ -2,10 +2,10 @@ const axios = require('axios');
 
 const getEndpoint = ({key, password}, store) => `https://${key}:${password}@${store}.myshopify.com/admin/api/2020-10`;
 
-const getOrders = async ({privateApp, store}, params) => {
+const getOrders = async ({privateApp, storeId}, params) => {
   try {
     const response = await axios.get(
-      `${getEndpoint(privateApp, store)}/orders.json`,
+      `${getEndpoint(privateApp, storeId)}/orders.json`,
       {params}
     );
 
@@ -17,10 +17,10 @@ const getOrders = async ({privateApp, store}, params) => {
   }
 };
 
-const getProducts = async ({privateApp, store}, params) => {
+const getProducts = async ({privateApp, storeId}, params) => {
   try {
     const response = await axios.get(
-      `${getEndpoint(privateApp, store)}/products.json`,
+      `${getEndpoint(privateApp, storeId)}/products.json`,
       {params}
     );
 

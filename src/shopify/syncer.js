@@ -15,7 +15,7 @@ module.exports = async (shopify) => {
     while (true) {
       const results = await mongo.client.db(shopify.database)
         .collection(COLLECTION)
-        .find()
+        .find({ storeId: shopify.storeId })
         .project({ id: 1, updated_at: 1 })
         .sort({ updated_at: -1 })
         .limit(1)
@@ -44,8 +44,8 @@ module.exports = async (shopify) => {
         .bulkWrite(
           orders.map((order) => ({
             updateOne: {
-              filter: { id : order.id },
-              update: { $set: order },
+              filter: { storeId: shopify.storeId, id: order.id },
+              update: { $set: { storeId: shopify.storeId, ...order } },
               upsert: true
             }
           }))
