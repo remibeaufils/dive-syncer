@@ -1,6 +1,6 @@
 const gaAPI = require('./api/google-analyticsreporting-v4-api');
 const googleAuth = require('../google-auth');
-const moment = require('moment');
+const { addDays, format, isSameDay, parse, startOfYesterday } = require('date-fns');
 const mongo = require('../mongo-connect');
 const audienceReport = require('./reports/audience-report');
 const acquisitionReport = require('./reports/acquisition-report');
@@ -20,20 +20,20 @@ const getDateRanges = async (database) => {
     .toArray();
 
   const minDate = !results.length
-    ? moment('2019-01-01', 'YYYYMMDD') // by default?
-    : moment(results[0]['ga:date'], 'YYYYMMDD').add(1, 'd')
+    ? parse('2019-01-01', 'yyyy-MM-dd', new Date()) // by default?
+    : addDays(parse(results[0]['ga:date'], 'yyyyMMdd', new Date()), 1)
   ;
 
-  const YESTERDAY = moment().subtract(1, 'days').startOf('day');
+  const YESTERDAY = startOfYesterday();
 
-  if (minDate.isSame(YESTERDAY, 'd')) {
+  if (isSameDay(minDate, YESTERDAY)) {
     console.log('Google Analytics everything already retrieved.');
     return;
   }
 
   return [{
-    startDate: minDate.format('YYYY-MM-DD'),
-    // endDate: minDate.clone().add(1, 'd').format('YYYY-MM-DD')
+    startDate: format(minDate, 'yyyy-MM-dd'),
+    // endDate: format(addDays(minDate, 1), 'yyyy-MM-dd'),
     endDate: 'yesterday'
   }];
 };
