@@ -1,5 +1,7 @@
 const shopifyAPI = require('./api/rest-api');
 const mongo = require('../mongo-connect');
+const orderReducer = require('./lib/order-reducer');
+const { formatISO } = require('date-fns');
 
 const COLLECTION = 'shopify-orders';
 // db.getCollection('shopify-orders').createIndex({ updated_at: 1 })
@@ -15,18 +17,18 @@ module.exports = async (shopify) => {
     while (true) {
       const results = await mongo.client.db(shopify.database)
         .collection(COLLECTION)
-        .find({ storeId: shopify.storeId })
-        .project({ id: 1, updated_at: 1 })
+        .find({ store_id: shopify.storeId })
+        .project({ updated_at: 1 })
         .sort({ updated_at: -1 })
         .limit(1)
         .toArray();
 
       const params = {
-        // fields: ['id', 'updated_at', 'status', 'line_items', 'total_price'],
+        fields: ['id', 'created_at', 'updated_at', 'cancelled_at', 'shipping_lines', 'refunds', 'line_items', 'currency'],
         limit: API_MAX_RESULTS_PER_PAGE,
         order: 'updated_at asc',
         status: 'any',
-        updated_at_min: results.length ? results[0].updated_at : null
+        updated_at_min: results.length ? formatISO(results[0].updated_at) : null
       };
 
       console.log('[Shopify] orders from: %s.', params.updated_at_min);
@@ -39,13 +41,22 @@ module.exports = async (shopify) => {
         return;
       }
 
+      const lineItems = orders.reduce(
+        (acc, order) => [... acc, ...orderReducer(order)],
+        []
+      );
+
       const { upsertedCount, modifiedCount } = await mongo.client.db(shopify.database)
         .collection(COLLECTION)
         .bulkWrite(
-          orders.map((order) => ({
+          lineItems.map((lineItem) => ({
             updateOne: {
-              filter: { storeId: shopify.storeId, id: order.id },
-              update: { $set: { storeId: shopify.storeId, ...order } },
+              filter: {
+                store_id: shopify.storeId,
+                order_id: lineItem.order_id,
+                variant_id: lineItem.variant_id
+              },
+              update: { $set: { store_id: shopify.storeId, ...lineItem } },
               upsert: true
             }
           }))
