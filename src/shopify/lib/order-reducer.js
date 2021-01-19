@@ -91,12 +91,12 @@ module.exports = (order) => {
       }
     } = line;
 
-    const line_item_net_shipping =
-      order_net_shipping * line_item_quantity / order_item_quantity;
+    const line_item_shipping =
+      order_shipping_lines_price * line_item_quantity / order_item_quantity;
 
-    const turnover = line_item_price * line_item_quantity
+    const line_item_turnover = line_item_price * line_item_quantity
       - line_item_discount_allocations
-      + line_item_net_shipping
+      + line_item_shipping
     ;
 
     // const refund_discrepancy = line_item_quantity !== 0
@@ -104,27 +104,27 @@ module.exports = (order) => {
     //   : 0
     // ;
 
-    const profit = turnover - line_item_net_shipping - refund_subtotal
+    const real_shipping_cost = line_item_shipping
+    // ^ Should be the real shipping cost because may vary from reality.
+
+    const line_item_profit = line_item_turnover
+      - refund_subtotal
+      - real_shipping_cost
       // - refund_discrepancy
       // - inventory cost
     ;
 
-    const line_item_net_quantity = line_item_quantity - refund_quantity;
-
-    const profit_per_unit = line_item_net_quantity
-      ? profit / line_item_net_quantity
-      : 0
-    ;
+    const profit_per_unit = line_item_profit / line_item_quantity;
 
     return {
       ...line,
-      turnover,
+      turnover: line_item_turnover,
       quantity: line_item_quantity,
-      profit,
+      profit: line_item_profit,
       profit_per_unit,
       detail: {
         ...line.detail,
-        line_item_net_shipping,
+        line_item_shipping,
         order_item_quantity,
         order_net_shipping,
         order_shipping_lines_price,

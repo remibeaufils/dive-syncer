@@ -3,6 +3,7 @@ const mongo = require('./mongo-connect');
 const syncers = {
   shopify: require('./shopify/syncer'),
   googleAnalytics: require('./google-analytics/syncer'),
+  facebook: require('./facebook/syncer'),
   // googleAdwordsSyncData: require('./google-adwords/syncer')
 };
     
