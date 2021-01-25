@@ -1,15 +1,13 @@
 const axios = require('axios');
 
-const getEndpoint = (shopify) => {
-  const { privateApp: { key, password }, storeId } = shopify;
+const API_VERSION = '2021-01';
 
-  return `https://${key}:${password}@${storeId}.myshopify.com/admin/api/2020-10`;
-};
+const getEndpoint = private_app => `${private_app}/admin/api/${API_VERSION}`;
 
-const getOrders = async (shopify, params) => {
+const getOrders = async (private_app, params) => {
   try {
     const response = await axios.get(
-      `${getEndpoint(shopify)}/orders.json`,
+      `${getEndpoint(private_app)}/orders.json`,
       {params}
     );
 
@@ -21,10 +19,10 @@ const getOrders = async (shopify, params) => {
   }
 };
 
-const getProducts = async ({privateApp, storeId}, params) => {
+const getProducts = async ({private_app}, params) => {
   try {
     const response = await axios.get(
-      `${getEndpoint(privateApp, storeId)}/products.json`,
+      `${getEndpoint(private_app)}/products.json`,
       {params}
     );
 

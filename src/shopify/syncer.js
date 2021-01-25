@@ -3,22 +3,22 @@ const mongo = require('../mongo-connect');
 const orderReducer = require('./lib/order-reducer');
 const { formatISO } = require('date-fns');
 
-const COLLECTION = 'shopify-orders';
-// db.getCollection('shopify-orders').createIndex({ updated_at: 1 })
+const COLLECTION = 'shopify-order-line-item';
+// db.getCollection('shopify-order-line-item').createIndex({ updated_at: 1 })
 
 // CONTROL A === B
-// A: db.getCollection("shopify-orders").count()
+// A: db.getCollection("shopify-order-line-item").count()
 // B: https://boutique-masque-antipollution-r-pur.myshopify.com/admin/api/2020-10/orders/count.json?status=any
 
 const API_MAX_RESULTS_PER_PAGE = 250;
 
-module.exports = async (shopify) => {
+module.exports = async (store, { private_app, shop }) => {
   try {
     while (true) {
-      const results = await mongo.client.db(shopify.database)
+      const results = await mongo.client.db(process.env.MONGO_DATABASE)
         .collection(COLLECTION)
-        .find({ store_id: shopify.storeId })
-        .project({ updated_at: 1 })
+        .find({ store_id: store.id })
+        .project({ updated_at: '$updated_at.date' })
         .sort({ updated_at: -1 })
         .limit(1)
         .toArray();
@@ -33,30 +33,32 @@ module.exports = async (shopify) => {
 
       console.log('[Shopify] orders from: %s.', params.updated_at_min);
 
-      const orders = await shopifyAPI.getOrders(shopify, params);
+      const orders = await shopifyAPI.getOrders(private_app, params);
 
       console.log('[Shopify] orders retrieved: %d.', orders.length);
 
-      if (!orders.length) {
-        return;
-      }
+      if (!orders.length) return;
 
       const lineItems = orders.reduce(
-        (acc, order) => [... acc, ...orderReducer(order)],
+        (acc, order) => [
+          ... acc,
+          ...orderReducer(shop, order)
+        ],
         []
       );
 
-      const { upsertedCount, modifiedCount } = await mongo.client.db(shopify.database)
+      const { upsertedCount, modifiedCount } = await mongo.client
+        .db(process.env.MONGO_DATABASE)
         .collection(COLLECTION)
         .bulkWrite(
-          lineItems.map((lineItem) => ({
+          lineItems.map(lineItem => ({
             updateOne: {
               filter: {
-                store_id: shopify.storeId,
+                store_id: store.id,
                 order_id: lineItem.order_id,
                 variant_id: lineItem.variant_id
               },
-              update: { $set: { store_id: shopify.storeId, ...lineItem } },
+              update: { $set: { ...lineItem, store_id: store.id } },
               upsert: true
             }
           }))
@@ -68,9 +70,7 @@ module.exports = async (shopify) => {
           modifiedCount
         );
 
-      if (!upsertedCount && !modifiedCount) {
-        return;
-      }
+      if (!upsertedCount && !modifiedCount) return;
     }
   } catch (error) {
     console.log('\x1b[31m[Shopify] orders ERROR: %s\x1b[0m', error);

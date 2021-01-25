@@ -3,9 +3,9 @@ const mongo = require('../mongo-connect');
 // const { formatISO } = require('date-fns');
 
 const COLLECTION = 'facebook';
-// db.getCollection('shopify-orders').createIndex({ updated_at: 1 })
+// db.getCollection('facebook').createIndex({ updated_at: 1 })
 
-module.exports = async (facebook) => {
+module.exports = async (store, facebook) => {
   try {
     while (true) {
       console.log('[Facebook] insights from: %s.');
@@ -18,7 +18,7 @@ module.exports = async (facebook) => {
 
       const params = {
         fields: 'cpc,spend',
-        time_range: '{"since":"2017-01-01","until":"2017-05-15"}',
+        time_range: '{"since":"2017-01-01","until":"2020-05-15"}',
         time_increment: 1
       };
 

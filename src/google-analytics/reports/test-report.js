@@ -1,5 +1,5 @@
-module.exports = (viewId, dateRanges, pageToken, pageSize) => ({
-  viewId: `${viewId}`,
+module.exports = (view_id, dateRanges, pageToken, pageSize) => ({
+  viewId: `${view_id}`,
   dateRanges,
   metrics: [
     // {expression: 'ga:users'},
@@ -13,7 +13,7 @@ module.exports = (viewId, dateRanges, pageToken, pageSize) => ({
     // {name: 'ga:yearWeek'},
     {name: 'ga:date'},
     // {name: 'ga:acquisitionTrafficChannel'},
-    {name: 'ga:campaign'}
+    // {name: 'ga:campaign'}
   ],
   hideTotals: true,
   hideValueRanges: true,

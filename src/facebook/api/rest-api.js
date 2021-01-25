@@ -1,18 +1,18 @@
 const axios = require('axios');
 
-const getEndpoint = (accountId) => {
-  return `https://graph.facebook.com/v9.0/${accountId}/insights`;
+const getEndpoint = (account_id) => {
+  return `https://graph.facebook.com/v9.0/${account_id}/insights`;
 };
 
 const getInsights = async (facebook, params) => {
-  const { accessToken, accountId } = facebook;
+  const { access_token, account_id } = facebook;
 
   try {
     const response = await axios.get(
-      getEndpoint(accountId),
+      getEndpoint(account_id),
       {
         params: {
-          access_token: accessToken,
+          access_token,
           ...params
         }
       }

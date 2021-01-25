@@ -1,4 +1,3 @@
-const stores = require('../stores');
 const mongo = require('./mongo-connect');
 const syncers = {
   shopify: require('./shopify/syncer'),
@@ -14,49 +13,45 @@ axios.interceptors.request.use((request) => {
   return request
 }) */
 
-const getSourcesToSync = (args) => {
-  const argStore = args[2];
-
-  if (!argStore) {
-    throw Error('Could not find mandatory argument store id');
-  }
-
-  const store = stores.find(({id}) => id === argStore);
-
-  if (!store) {
-    throw Error(`Could not find store with id '${argStore}'`);
-  }
-
+const getSourcesToSync = async (store, args) => {
   const argSources = args.slice(3);
   
-  if (!argSources.length) {
-    return store.sources.map(source => ({ ...source, database: store.database, storeId: store.id }));
-  }
+  if (!argSources.length) return store.sources;
 
   return argSources.reduce((acc, argSource) => {
-    const storeSource = store.sources.find(
-      ({name}) => name === argSource
-    );
+    const storeSource = store.sources.find(({name}) => name === argSource);
 
     if (!storeSource) {
-      throw Error(`Store '${argStore}' doesn't have source '${argSource}'`);
+      throw Error(`Store '${store.id}' doesn't have source '${argSource}'`);
     }
 
-    return [...acc, { ...storeSource, database: store.database, storeId: store.id }];
+    return [ ...acc, storeSource ];
   }, []);
 }
 
 (async () => {
   try {
-    const sources = getSourcesToSync(process.argv);
+    const argStore = process.argv[2];
+
+    if (!argStore) throw Error('Could not find mandatory argument store id');
+    
     await mongo.connect();
-    await Promise.all(sources.map(source => syncers[source.name](source)));
+
+    const store = await mongo.client.db(process.env.MONGO_DATABASE)
+      .collection('stores')
+      .findOne({ id: argStore });
+
+    if (!store) throw Error(`Could not find store with id '${argStore}'`);
+
+    const sources = await getSourcesToSync(store, process.argv);
+    
+    await Promise.all(
+      sources.map(source => syncers[source.name](store, source))
+    );
   } catch (error) {
     console.log('\x1b[31mError: %s\x1b[0m', error.message);
   } finally {
-    if (mongo.isConnected()) {
-      await mongo.close();
-    }
+    if (mongo.isConnected()) await mongo.close();
     console.log('[end]');
   }
 })();

@@ -10,9 +10,10 @@ class GoogleAuth {
       __dirname + '/../privatekey.json',
       null,
       [
-        'https://www.googleapis.com/auth/spreadsheets',
+        // 'https://www.googleapis.com/auth/spreadsheets',
+        // 'https://www.googleapis.com/auth/analytics',
         'https://www.googleapis.com/auth/analytics.readonly',
-        'https://www.googleapis.com/auth/adwords'
+        'https://www.googleapis.com/auth/adwords',
       ]
     );
   }
@@ -25,9 +26,9 @@ class GoogleAuth {
             return reject(err);
           }
 
-          if (!this.isAuthorized()) {
-            return reject('Couldn\'t authenticate to Google');
-          }
+          // if (!this.isAuthorized()) {
+          //   return reject('Couldn\'t authenticate to Google');
+          // }
         
           console.log('\x1b[32mGoogle Auth: authorized\x1b[0m');
           
@@ -44,7 +45,8 @@ class GoogleAuth {
   isAuthorized() {
     return !!this.jwtClient
       && !!this.jwtClient.gtoken
-      && !!this.jwtClient.gtoken.token;
+      // && !!this.jwtClient.gtoken.token
+      ;
   }
 }
 

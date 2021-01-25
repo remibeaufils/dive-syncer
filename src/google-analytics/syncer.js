@@ -1,6 +1,7 @@
-const gaAPI = require('./api/google-analyticsreporting-v4-api');
+const analyticsReportingAPI = require('./api/google-analyticsreporting-v4-api');
 const googleAuth = require('../google-auth');
-const { addDays, format, isSameDay, parse, startOfYesterday } = require('date-fns');
+const { addDays, format, isSameDay, parse, startOfToday } = require('date-fns');
+const { toDate } = require('date-fns-tz');
 const mongo = require('../mongo-connect');
 const audienceReport = require('./reports/audience-report');
 const acquisitionReport = require('./reports/acquisition-report');
@@ -10,23 +11,23 @@ const COLLECTION = 'google-analytics';
 const API_MAX_ROWS_PER_REQUEST = '10000';
 const DEFAULT_PAGE_TOKEN = '0';
 
-const getDateRanges = async (database) => {
-  const results = await mongo.client.db(database)
+const getDateRanges = async (store, timezone) => {
+  const results = await mongo.client.db(process.env.MONGO_DATABASE)
     .collection(COLLECTION)
-    .find()
-    .project({'ga:date': 1})
-    .sort({'ga:date':-1})
+    .find({ store_id: store.id })
+    .project({ 'ga:date': '$ga:date.date' })
+    .sort({ 'ga:date': -1 })
     .limit(1)
     .toArray();
 
   const minDate = !results.length
-    ? parse('2019-01-01', 'yyyy-MM-dd', new Date()) // by default?
-    : addDays(parse(results[0]['ga:date'], 'yyyyMMdd', new Date()), 1)
+    ? toDate('2018-01-01', { timeZone: timezone }) // Opening date of the store.
+    : addDays(results[0]['ga:date'], 1)
   ;
 
-  const YESTERDAY = startOfYesterday();
+  const TODAY = startOfToday();
 
-  if (isSameDay(minDate, YESTERDAY)) {
+  if (isSameDay(minDate, TODAY)) {
     console.log('Google Analytics everything already retrieved.');
     return;
   }
@@ -38,21 +39,27 @@ const getDateRanges = async (database) => {
   }];
 };
 
-module.exports = async ({database, viewId}) => {
+module.exports = async (store, { timezone, view_id }) => {
   try {
     const results = [];
 
-    const dateRanges = await getDateRanges(database);
+    const dateRanges = await getDateRanges(store, timezone);
+
+    if (!dateRanges) return;
     
     console.log(
       '[Google Analytics] data request: from %s.',
       dateRanges[0].startDate
     );
 
-    let reports = [audienceReport,acquisitionReport/* , testReport */];
+    let reports = [
+      // audienceReport,
+      acquisitionReport,
+      // testReport,
+    ];
 
     let reportRequests = reports.map(report => report(
-      viewId,
+      view_id,
       dateRanges,
       DEFAULT_PAGE_TOKEN,
       API_MAX_ROWS_PER_REQUEST
@@ -61,7 +68,7 @@ module.exports = async ({database, viewId}) => {
     // await googleAuth.authorize();
 
     do {
-      const reportResponses = await gaAPI.batchGet({
+      const reportResponses = await analyticsReportingAPI.batchGet({
         auth: googleAuth.jwtClient,
         resource: {reportRequests}
       });
@@ -79,10 +86,26 @@ module.exports = async ({database, viewId}) => {
       }
 
       const resultsFormatted = data.reduce(
-        (acc, {headers, rows}) => {
+        (acc, { headers, rows }) => {
           const rowsFormatted = rows.map(
             row => row.reduce(
-              (acc, val, index) => ({...acc, [headers[index]]: val}),
+              (acc, value, index) => {
+                const key = headers[index];
+
+                const val =
+                  ![
+                    'ga:date',
+                    'ga:dateHour',
+                    'ga:dateHourMinute'
+                  ].includes(key)
+                    ? value
+                    : {
+                      date: toDate(value, { timeZone: timezone }),
+                      timezone: timezone,
+                    };
+
+                return { ...acc, [key]: val };
+              },
               {}
             )
           );
@@ -99,7 +122,7 @@ module.exports = async ({database, viewId}) => {
           ? {
             ...acc,
             reports: [...acc.reports, report],
-            reportRequests: [...acc.reportRequests, report(viewId, dateRanges, reportResponses[index].nextPageToken)]
+            reportRequests: [...acc.reportRequests, report(view_id, dateRanges, reportResponses[index].nextPageToken)]
           }
           : acc),
         {reports: [], reportRequests: []}
@@ -113,16 +136,18 @@ module.exports = async ({database, viewId}) => {
 
     console.log('[Google Analytics] writing %d operations.', results.length);
 
-    const {upsertedCount, modifiedCount} = await mongo.client.db(database)
+    const {upsertedCount, modifiedCount} = await mongo.client
+      .db(process.env.MONGO_DATABASE)
       .collection(COLLECTION)
       .bulkWrite(
         results.map((result) => ({
           updateOne: {
             filter: {
+              store_id: store.id,
               'ga:date' : result['ga:date'],
-              'ga:campaign' : result['ga:campaign']
+              // 'ga:campaign' : result['ga:campaign']
             },
-            update: { $set: result },
+            update: { $set: { ...result, store_id: store.id } },
             upsert: true
           }
         }))

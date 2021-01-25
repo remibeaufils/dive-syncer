@@ -4,20 +4,20 @@
 // https://github.com/facebook/facebook-nodejs-business-sdk
 const bizSdk = require('facebook-nodejs-business-sdk');
 
-// const accessToken = '{access-token}';
-// const accountId = 'act_{{adaccount-id}}';
+// const access_token = '{access-token}';
+// const account_id = 'act_{{adaccount-id}}';
 
 // https://developers.facebook.com/apps/810256299552408/marketing-api/tools/?business_id=419757179433482
-const accessToken = 'EAALg7H7pbpgBAKjJv7j8C3XM4RpGdsjKRfZCnGixZCsMFUkyPZA7ZBtpOzgYQI631gaOwgKZAueeOqABJqVRHYsglq2lUB98pwbO9K4ZANKg2CiKTMsQkUmmt1ijGqqpKuHHTKqCpXYZASa3SvcZAWQUygZCE4WCclX6Xwb0XcMnNGktr49tPcHFBqfQwZBIZC23cit8aEAhOgTEQZDZD';
+const access_token = 'EAALg7H7pbpgBAKjJv7j8C3XM4RpGdsjKRfZCnGixZCsMFUkyPZA7ZBtpOzgYQI631gaOwgKZAueeOqABJqVRHYsglq2lUB98pwbO9K4ZANKg2CiKTMsQkUmmt1ijGqqpKuHHTKqCpXYZASa3SvcZAWQUygZCE4WCclX6Xwb0XcMnNGktr49tPcHFBqfQwZBIZC23cit8aEAhOgTEQZDZD';
 
-const accountId = 'act_1094221174070759';
+const account_id = 'act_1094221174070759';
 
-const FacebookAdsApi = bizSdk.FacebookAdsApi.init(accessToken);
+const FacebookAdsApi = bizSdk.FacebookAdsApi.init(access_token);
 
 const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 
-const account = new AdAccount(accountId);
+const account = new AdAccount(account_id);
 console.log(account.id) // fields can be accessed as properties
 var campaigns;
     

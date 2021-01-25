@@ -1,4 +1,4 @@
-module.exports = (order) => {
+module.exports = ({ iana_timezone: shop_timezone }, order) => {
   const {
     id: order_id,
     created_at: order_created_at,
@@ -47,9 +47,9 @@ module.exports = (order) => {
 
       acc.lines.push({
         order_id: order_id ? `${order_id}` : null,
-        created_at: order_created_at ? new Date(order_created_at) : null,
-        cancelled_at: order_cancelled_at ? new Date(order_cancelled_at) : null,
-        updated_at: order_updated_at ? new Date(order_updated_at) : null,
+        created_at: buildDateField(shop_timezone, order_created_at),
+        cancelled_at: buildDateField(shop_timezone, order_cancelled_at),
+        updated_at: buildDateField(shop_timezone, order_updated_at),
         variant_id: variant_id ? `${variant_id}` : null,
         product_id: product_id ? `${product_id}` : null,
         currency,
@@ -135,3 +135,8 @@ module.exports = (order) => {
 
   return lines;
 };
+
+const buildDateField = (shop_timezone, dateString) =>
+  !dateString
+    ? null
+    : { date: new Date(dateString), timezone: shop_timezone };
