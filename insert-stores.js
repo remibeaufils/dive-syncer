@@ -33,6 +33,8 @@ db.getCollection("stores").insertMany([
         name: "facebook",
         account_id: "act_2289750570730",
         access_token: "EAALg7H7pbpgBAEWbTlDFeBcAgZCVFZCiT9gr9IRCjrGuqci6iL7BjgtCO3RhwyVcmQEmICrKhLrFsT9Bt0KBRPDZCitiGptXu89WHaDMEJSlqKBrsGcO0T6ZAm7bweG6ZCi8eJqgPPUQMr6VrVaQHWBe1GsTZBwj12Py1iPPhdA77yNH2hjjZC7Ylf5ZCrf8qYwZD",
+        "currency": "EUR",
+        "timezone_name": "Europe/Paris",
       },
       {
         "name": "googleAnalytics",

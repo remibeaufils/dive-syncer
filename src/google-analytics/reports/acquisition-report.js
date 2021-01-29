@@ -3,16 +3,24 @@ module.exports = (view_id, dateRanges, pageToken, pageSize) => ({
   dateRanges,
   metrics: [
     {expression: 'ga:adCost'}, // , formattingType: 'CURRENCY'
+    
+    {expression: 'ga:transactions'},
+    // {expression: 'ga:costPerTransaction'}, // = ga:adCost / ga:transactions
+    // {expression: 'ga:adCost/ga:transactions', alias: 'ga:cpa', formattingType: 'float' },
+    
+    {expression: 'ga:transactionRevenue'},
+    // {expression: 'ga:ROAS'}, // = ga:transactionRevenue / ga:adCost * 100
+    // {expression: 'ga:transactionRevenue/ga:adCost', alias: 'ga:roas', formattingType: 'float' },
+
     // {expression: 'ga:impressions'},
     // {expression: 'ga:CPM'}, // = ga:adCost / (ga:impressions / 1000)
+    
     // {expression: 'ga:adClicks'},
     // {expression: 'ga:CPC'}, // = ga:adCost / ga:adClicks
-    {expression: 'ga:ROAS'},
-    // {expression: 'ga:transactions'},
-    // {expression: 'ga:transactionRevenue'},
   ],
   dimensions: [
     {name: 'ga:date'},
+    // {name: 'ga:currencyCode'},
     // {name: 'ga:campaign'},
     // {name: 'ga:yearMonth'},
     // {name: 'ga:week'},
