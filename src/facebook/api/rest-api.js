@@ -1,7 +1,68 @@
 const axios = require('axios');
 
-const getEndpoint = (account_id) => {
-  return `https://graph.facebook.com/v9.0/${account_id}`;
+const BASE_URL = 'https://graph.facebook.com/v9.0';
+
+const getAccessToken = async () => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/oauth/access_token`,
+      {
+        params: {
+          client_id: 810256299552408,
+          client_secret: '863e5c53422a3dde8e6d8b2b0335853d',
+          grant_type: 'client_credentials',
+        }
+      }
+    );
+
+    return response.data.access_token;
+  } catch (error) {
+    console.log('\x1b[31mError: %s\x1b[0m', error.message);
+
+    return null;
+  }
+};
+
+const getLonglivedAccessToken = async (access_token) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/oauth/access_token`,
+      {
+        params: {
+          grant_type: 'fb_exchange_token',
+          client_id: 810256299552408,
+          client_secret: '863e5c53422a3dde8e6d8b2b0335853d',
+          fb_exchange_token: access_token,
+        }
+      }
+    );
+
+    return response.data.access_token;
+  } catch (error) {
+    console.log('\x1b[31mError: %s\x1b[0m', error.response.data.error.message);
+
+    return null;
+  }
+};
+
+const debugToken = async (access_token) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/debug_token`,
+      {
+        params: {
+          access_token,
+          input_token: access_token,
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log('\x1b[31mError: %s\x1b[0m', error.response.data.error.message);
+
+    return null;
+  }
 };
 
 const getAccount = async (facebook, params) => {
@@ -12,7 +73,7 @@ const getAccount = async (facebook, params) => {
   
   try {
     const response = await axios.get(
-      `${getEndpoint(account_id)}`,
+      `${BASE_URL}/${account_id}`,
       {
         params: {
           access_token,
@@ -23,9 +84,9 @@ const getAccount = async (facebook, params) => {
 
     return response.data;    
   } catch (error) {
-    console.log('\x1b[31mError: %s\x1b[0m', error.message);
+    console.log('\x1b[31mError: %s\x1b[0m', error.response.data.error.message);
 
-    return [];    
+    return null;
   }
 };
 
@@ -34,10 +95,11 @@ const getInsights = async (facebook, params) => {
 
   // https://developers.facebook.com/docs/marketing-api/reference/ads-insights
   // https://developers.facebook.com/docs/marketing-api/insights/parameters/v9.0
+  // ? https://stackoverflow.com/questions/43933745/facebook-marketing-api-hourly-breakdown
 
   try {
     const response = await axios.get(
-      `${getEndpoint(account_id)}/insights`,
+      `${BASE_URL}/${account_id}/insights`,
       {
         params: {
           access_token,
@@ -48,10 +110,10 @@ const getInsights = async (facebook, params) => {
 
     return response.data;    
   } catch (error) {
-    console.log('\x1b[31mError: %s\x1b[0m', error.message);
+    console.log('\x1b[31mError: %s\x1b[0m', error.response.data.error.message);
 
-    return [];    
+    return [];
   }
 };
 
-module.exports = { getAccount, getInsights };
+module.exports = { debugToken, getAccessToken, getLonglivedAccessToken, getAccount, getInsights };
