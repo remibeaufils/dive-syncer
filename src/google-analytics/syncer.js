@@ -1,11 +1,9 @@
 const analyticsReportingAPI = require('./api/google-analyticsreporting-v4-api');
 const googleAuth = require('../google-auth');
-const { addDays, format, isSameDay, parse, startOfToday } = require('date-fns');
-const { toDate } = require('date-fns-tz');
+const { addDays, format, isSameDay } = require('date-fns');
+const { toDate, utcToZonedTime } = require('date-fns-tz');
 const mongo = require('../mongo-connect');
-const audienceReport = require('./reports/audience-report');
 const acquisitionReport = require('./reports/acquisition-report');
-const testReport = require('./reports/test-report');
 
 const COLLECTION = 'google-analytics';
 const API_MAX_ROWS_PER_REQUEST = '10000';
@@ -15,26 +13,32 @@ const getDateRanges = async (store, timezone) => {
   const results = await mongo.client.db(process.env.MONGO_DATABASE)
     .collection(COLLECTION)
     .find({ store_id: store.id })
-    .project({ 'ga:date': '$ga:date.date' })
-    .sort({ 'ga:date': -1 })
+    .project({ 'ga:date': 1 })
+    .sort({ 'ga:date.date': -1 })
     .limit(1)
     .toArray();
 
   const minDate = !results.length
     ? toDate('2018-01-01', { timeZone: timezone }) // Opening date of the store.
-    : addDays(results[0]['ga:date'], 1)
+    : utcToZonedTime(
+      addDays(results[0]['ga:date'].date, 1),
+      results[0]['ga:date'].timezone
+    )
   ;
 
-  const TODAY = startOfToday();
+  // Date in server timezone.
+  const now = new Date();
+
+  // Convert into add account timezone. 
+  const TODAY = utcToZonedTime(now, timezone);
 
   if (isSameDay(minDate, TODAY)) {
-    console.log('Google Analytics everything already retrieved.');
+    console.log('[Google Analytics] everything already retrieved.');
     return;
   }
 
   return [{
     startDate: format(minDate, 'yyyy-MM-dd'),
-    // endDate: format(addDays(minDate, 1), 'yyyy-MM-dd'),
     endDate: 'yesterday'
   }];
 };
@@ -53,8 +57,8 @@ module.exports = async (store, { timezone, view_id }) => {
     );
 
     let reports = [
-      // audienceReport,
       acquisitionReport,
+      // audienceReport,
       // testReport,
     ];
 
