@@ -7,17 +7,30 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "sync": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-dist": "./node_modules/typescript/bin/tsc",
+    "start": "./node_modules/typescript/bin/tsc && node --enable-source-maps dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
   },
   "keywords": [],
   "license": "ISC",
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
     "axios": "^0.21.1",
     "date-fns": "^2.16.1",
     "date-fns-tz": "^1.0.12",
     "dotenv": "^8.2.0",
+    "eslint": "^7.19.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "facebook-nodejs-business-sdk": "^9.0.1",
     "googleapis": "^66.0.0",
-    "mongodb": "^3.6.2"
+    "mongodb": "^3.6.2",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.25"
   }
 }

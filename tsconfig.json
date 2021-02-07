@@ -1,0 +1,41 @@
+{
+ "compilerOptions": {
+   "target": "esnext",
+   "module": "commonjs",
+   "allowJs": true,
+   "checkJs": false,
+   "rootDir": "src",
+   "outDir": "dist",
+   "strict": false,
+   "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+   "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+   "declaration": true, /* Generates corresponding '.d.ts' file. */
+   "strictNullChecks": true,
+   "resolveJsonModule": false,
+   "sourceMap": true,
+   "baseUrl": ".",
+   "paths": {
+    "*": [
+      "*",
+      "src/*",
+      "src/setup/*",
+      "src/logic/*",
+      "src/models/*",
+      "config/*"
+    ]
+  },
+ },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "docker-init-mongo.js",
+    "insert-stores.js",
+    "privatekey.json"
+  ],
+  "include": [
+    "./src",
+    "./test",
+    "./*",
+    "./config",
+  ]
+}

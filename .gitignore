@@ -1,6 +1,7 @@
 .vscode/
 mongo-volume*/
 node_modules/
+dist/
 .env
 privatekey.json*
 merchants.js
