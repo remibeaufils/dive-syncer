@@ -27,6 +27,9 @@ export default async (store, { private_app, shop }) => {
             const params = {
                 fields: [
                     'id',
+                    'order_number',
+                    'financial_status',
+                    'customer',
                     'created_at',
                     'updated_at',
                     'cancelled_at',
@@ -49,7 +52,10 @@ export default async (store, { private_app, shop }) => {
 
             if (!orders.length) return;
 
-            const lineItems = orders.reduce((acc, order) => [...acc, ...orderReducer(shop, order)], []);
+            const lineItems = orders.reduce(
+                (acc, order) => [...acc, ...orderReducer(shop, store.real_shipping_costs, order)],
+                [],
+            );
 
             const { upsertedCount, modifiedCount } = await mongo.client
                 .db(process.env.MONGO_DATABASE)

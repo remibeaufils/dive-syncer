@@ -1,6 +1,9 @@
-export default ({ iana_timezone: shop_timezone }, order) => {
+export default ({ iana_timezone: shop_timezone }: any, realShippingLinesCost: any, order: any): any => {
     const {
         id: order_id,
+        order_number,
+        financial_status,
+        customer,
         created_at: order_created_at,
         cancelled_at: order_cancelled_at,
         updated_at: order_updated_at,
@@ -9,6 +12,8 @@ export default ({ iana_timezone: shop_timezone }, order) => {
         line_items,
         currency,
     } = order;
+
+    // console.log(order_id);
 
     // Calculate line item refunds and order adjustments.
 
@@ -41,7 +46,7 @@ export default ({ iana_timezone: shop_timezone }, order) => {
     // Calculate line items.
 
     const { order_item_quantity, lines } = line_items.reduce(
-        (acc, { id, variant_id, product_id, quantity, price, discount_allocations, tax_lines }) => {
+        (acc, { id, name, variant_id, product_id, quantity, price, discount_allocations, tax_lines }) => {
             const {
                 quantity: refund_quantity,
                 subtotal: refund_subtotal,
@@ -56,11 +61,22 @@ export default ({ iana_timezone: shop_timezone }, order) => {
 
             acc.lines.push({
                 order_id: order_id ? `${order_id}` : null,
+                order_number,
+                financial_status,
+                customer: customer
+                    ? {
+                          id: customer.id,
+                          first_name: customer.first_name,
+                          last_name: customer.last_name,
+                      }
+                    : null,
+                shipping_lines: shipping_lines.map(({ code }) => code).join(','),
                 created_at: buildDateField(shop_timezone, order_created_at),
                 cancelled_at: buildDateField(shop_timezone, order_cancelled_at),
                 updated_at: buildDateField(shop_timezone, order_updated_at),
                 variant_id: variant_id ? `${variant_id}` : null,
                 product_id: product_id ? `${product_id}` : null,
+                name,
                 currency,
                 detail: {
                     line_item_quantity: quantity,
@@ -80,7 +96,15 @@ export default ({ iana_timezone: shop_timezone }, order) => {
 
     // Calculate order shipping cost
 
-    const order_shipping_lines_price = shipping_lines.reduce((acc, { price }) => acc + parseFloat(price), 0);
+    // const order_shipping_lines_price = shipping_lines.reduce((acc, { price }) => acc + parseFloat(price), 0);
+
+    const { order_shipping_lines_price, real_shipping_cost } = shipping_lines.reduce(
+        ({ order_shipping_lines_price, real_shipping_cost }, { code, price }) => ({
+            order_shipping_lines_price: order_shipping_lines_price + parseFloat(price),
+            real_shipping_cost: real_shipping_cost + (realShippingLinesCost[code] || 0),
+        }),
+        { order_shipping_lines_price: 0, real_shipping_cost: 0 },
+    );
 
     const order_shipping_final = order_shipping_lines_price + (refundOrderAdjustments.shipping_refund || 0);
     // Calculate item lines FINISH.
@@ -116,26 +140,31 @@ export default ({ iana_timezone: shop_timezone }, order) => {
             line_item_refund_total;
         line_item_turnover = Math.round(line_item_turnover * 100) / 100;
 
-        // const real_shipping_cost = line_item_shipping_net
-        // ^ Should be the real shipping cost because may vary from reality.
+        const line_item_real_shipping_cost = real_shipping_cost * line_item_ratio;
 
-        // const line_item_profit = line_item_turnover
-        //   - refund_subtotal
-        //   - real_shipping_cost
-        // - refund_discrepancy
-        // - inventory cost
-        // const profit_per_unit = line_item_profit / line_item_quantity;
+        // TODO
+        const line_item_inventory_cost = 0 * line_item_quantity;
+
+        // TODO
+        const ad_spend = 0;
+
+        const line_item_profit =
+            line_item_turnover - line_item_real_shipping_cost - line_item_inventory_cost - ad_spend;
+
+        const line_item_profit_per_unit = line_item_profit / line_item_quantity;
 
         return {
             ...line,
             turnover: line_item_turnover,
             quantity: line_item_quantity,
-            // profit: line_item_profit,
-            // profit_per_unit,
+            profit: line_item_profit,
+            profit_per_unit: line_item_profit_per_unit,
             detail: {
                 ...line.detail,
                 line_item_shipping,
                 line_item_refund_discrepancy,
+                line_item_real_shipping_cost,
+                line_item_inventory_cost,
                 order_item_quantity,
                 order_shipping_lines_price,
                 order_shipping_final,
