@@ -11,13 +11,16 @@
     "dev": "./node_modules/typescript/bin/tsc && node --enable-source-maps dist/index.js",
     "start": "node --enable-source-maps dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "airtable-dev": "./node_modules/typescript/bin/tsc && node --enable-source-maps dist/index-airtable.js",
+    "airtable-start": "node --enable-source-maps dist/index-airtable.js"
   },
   "keywords": [],
   "license": "ISC",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^4.14.2",
     "@typescript-eslint/parser": "^4.14.2",
+    "airtable": "^0.10.1",
     "axios": "^0.21.1",
     "date-fns": "^2.16.1",
     "date-fns-tz": "^1.0.12",

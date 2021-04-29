@@ -1,0 +1,73 @@
+// saveInGSheet2(auth, spreadsheet, headers, rows);
+
+/* const saveInGSheet = async (auth, spreadsheet, headers, rows) => {
+  gsheetAPI.valuesUpdate({
+    auth,
+    valueInputOption: 'USER_ENTERED', // INPUT_VALUE_OPTION_UNSPECIFIED, RAW
+    // insertDataOption: 'INSERT_ROWS',
+    resource: {values : [headers, ...rows]},
+    spreadsheetId: spreadsheet.id,
+    range: spreadsheet.sheets.googleAnalytics.name
+  });
+}; */
+
+const saveInGSheet2 = async (auth, spreadsheet, headers, rows) => {
+    await gsheetAPI.batchUpdate({
+        auth,
+        spreadsheetId: spreadsheet.id,
+        resource: {
+            requests: [
+                // {
+                //   appendDimension: {
+                //     sheetId: config.SHEET_ID,
+                //     dimension: 'ROWS',
+                //     length: all_rows - max_rows
+                //   }
+                // },
+                // {
+                //   "insertRange": {
+                //     "range": {
+                //     "sheetId": spreadsheet.sheets.googleAnalytics.id,
+                //     "startRowIndex": 1,
+                //     "endRowIndex": 4
+                //     },
+                //     "shiftDimension": "ROWS"
+                //   }
+                // },
+                {
+                    pasteData: {
+                        data: headers.toString(),
+                        type: 'PASTE_NORMAL', // Enum: PASTE_NORMAL, PASTE_VALUES, PASTE_FORMAT, PASTE_NO_BORDERS, PASTE_FORMULA, PASTE_DATA_VALIDATION, PASTE_CONDITIONAL_FORMATTING
+                        delimiter: ',',
+                        coordinate: {
+                            sheetId: spreadsheet.sheets.googleAnalytics.id,
+                            rowIndex: 0,
+                        },
+                    },
+                },
+                {
+                    insertDimension: {
+                        range: {
+                            sheetId: spreadsheet.sheets.googleAnalytics.id,
+                            dimension: 'ROWS',
+                            startIndex: 1,
+                            endIndex: rows.length + 1,
+                        },
+                        inheritFromBefore: false,
+                    },
+                },
+                ...rows.map((row, index) => ({
+                    pasteData: {
+                        data: row.toString(),
+                        type: 'PASTE_NORMAL',
+                        delimiter: ',',
+                        coordinate: {
+                            sheetId: spreadsheet.sheets.googleAnalytics.id,
+                            rowIndex: index + 1,
+                        },
+                    },
+                })),
+            ],
+        },
+    });
+};

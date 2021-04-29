@@ -1,3 +1,5 @@
+import buildDateField from './build-date-field';
+
 export default ({ iana_timezone: shop_timezone }: any, realShippingLinesCost: any, order: any): any => {
     const {
         id: order_id,
@@ -161,6 +163,7 @@ export default ({ iana_timezone: shop_timezone }: any, realShippingLinesCost: an
             profit_per_unit: line_item_profit_per_unit,
             detail: {
                 ...line.detail,
+                line_item_ratio,
                 line_item_shipping,
                 line_item_refund_discrepancy,
                 line_item_real_shipping_cost,
@@ -175,6 +178,3 @@ export default ({ iana_timezone: shop_timezone }: any, realShippingLinesCost: an
 
     return result;
 };
-
-const buildDateField = (shop_timezone, dateString) =>
-    !dateString ? null : { date: new Date(dateString), timezone: shop_timezone };

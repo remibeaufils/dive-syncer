@@ -10,22 +10,32 @@ const getAccounts = async (googleAuth) => {
     return response.data.items;
 };
 
-const getProfile = async (googleAuth) => {
-    // const response = await management.profiles.list({
-    //   auth: googleAuth.jwtClient,
-    //   accountId: '121455691',
-    //   webPropertyId: '~all',
-    // });
+const getProfileList = async (googleAuth, accountId) => {
+    // accountId = '121455691'
 
-    // if (!response || !response.data || !response.data.items) return null;
+    const response = await management.profiles.list({
+        auth: googleAuth.jwtClient,
+        accountId,
+        webPropertyId: '~all',
+    });
 
-    // const profile = response.data.items.find(({ id }) => id === '177707398');
+    if (!response || !response.data || !response.data.items) return null;
+
+    return response.data.items;
+};
+
+const getProfile = async (googleAuth, accountId, webPropertyId, profileId) => {
+    // accountId = '121455691'
+    // webPropertyId = 'UA-121455691-1'
+    // profileId = '177707398'
+
+    // const profile = profiles.find(({ id }) => id === '177707398');
 
     const response = await management.profiles.get({
         auth: googleAuth.jwtClient,
-        accountId: '121455691',
-        webPropertyId: 'UA-121455691-1',
-        profileId: '177707398',
+        accountId,
+        webPropertyId,
+        profileId,
     });
 
     const profile = response.data;
@@ -34,4 +44,4 @@ const getProfile = async (googleAuth) => {
     return profile;
 };
 
-export { getAccounts, getProfile };
+export { getAccounts, getProfileList, getProfile };

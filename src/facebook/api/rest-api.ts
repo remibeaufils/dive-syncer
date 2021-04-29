@@ -78,7 +78,7 @@ const getAccount = async (facebook, params) => {
     }
 };
 
-const getInsights = async (facebook, params) => {
+const getInsights = async (facebook, params, next) => {
     const { access_token, account_id } = facebook;
 
     // https://developers.facebook.com/docs/marketing-api/reference/ads-insights
@@ -86,7 +86,7 @@ const getInsights = async (facebook, params) => {
     // ? https://stackoverflow.com/questions/43933745/facebook-marketing-api-hourly-breakdown
 
     try {
-        const response = await axios.get(`${BASE_URL}/${account_id}/insights`, {
+        const response = await axios.get(next ? next : `${BASE_URL}/${account_id}/insights`, {
             params: {
                 access_token,
                 ...params,

@@ -3,6 +3,8 @@ import shopify from './shopify/syncer';
 import googleAnalytics from './google-analytics/syncer';
 import facebook from './facebook/syncer';
 // import googleAdwords from './google-adwords/syncer';
+// import googleAuth from './google-auth';
+// import { getProfileList } from './google-analytics/api/google-analytics-v3-api';
 
 const syncers = { shopify, googleAnalytics, facebook };
 
@@ -31,6 +33,8 @@ const getSourcesToSync = async (store, args) => {
 
 (async () => {
     try {
+        // const profileList = await getProfileList(googleAuth, 93538952);
+
         const argStore = process.argv[2];
 
         if (!argStore) throw Error('Could not find mandatory argument store id');
